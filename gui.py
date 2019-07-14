@@ -7,7 +7,7 @@ class MyWindow(QWidget):
 
 	def __init__(self):  
 	    super().__init__()
-	    self.setWindowTitle('PyQt5布局示例')
+	    self.setWindowTitle('拆迁房价计算器')
 	    
 	    # 开始：
 	    wlayout = QVBoxLayout() # 竖直
@@ -19,14 +19,14 @@ class MyWindow(QWidget):
 	    floorLabels = []
 	    self.floorAreas = []
 	    for i in range(6):
-	        floorLabels.append(QLabel(f"{i+1}楼:{a[i]}元/平米"))
+	        floorLabels.append(QLabel("{flooor}楼:{price}元/平米".format(flooor = i+1,price=a[i])))
 	        self.floorAreas.append(QLineEdit(""))
 
 	    for i,(label, edit) in enumerate(zip(floorLabels, self.floorAreas)):
 	        glayout.addWidget(label,i,0)
 	        glayout.addWidget(edit,i,1)
 
-	    couponLabel = QLabel(f"购房券")
+	    couponLabel = QLabel("购房券/元")
 	    self.couponEdit = QLineEdit()
 	    glayout.addWidget(couponLabel,3,2)
 	    glayout.addWidget(self.couponEdit,3,3)
@@ -67,26 +67,27 @@ class MyWindow(QWidget):
 		except:
 			coupon = 0
 		areas = np.array(areas)
-		cheap_price, cheap_areas = getcheapPrice(areas, coupon, sorted_h_price)
-		mid_p_areas = getNormalPrice(areas-cheap_areas, sorted_middle_price)
-		h_p_areas = areas-cheap_areas-mid_p_areas
 
-		all_price = cheap_price + sum(mid_p_areas * b) + sum(h_p_areas * c)
+		all_price, cheap_areas, mid_p_areas, h_p_areas = getAllPrice(areas, coupon)
 
 		self.resTxt.clear()
-		self.resTxt.append(f'购房券 {coupon}')
-		self.resTxt.append(f'购房面积（1-6楼）{areas}')
+		self.resTxt.append('购房券 {coupon}'.format(coupon=coupon))
+		self.resTxt.append('购房面积（1-6楼）{areas}'.format(areas=areas))
 
-		self.resTxt.append(f"购房总价: {all_price}")
+		self.resTxt.append("购房总价: {all_price}".format(all_price=all_price))
 
-		self.resTxt.append(f'拆迁价（1-6楼）: {a}')
-		self.resTxt.append(f'拆迁面积（1-6楼）: {cheap_areas}')
-		self.resTxt.append(f'优惠价（1-6楼）: {b}')
-		self.resTxt.append(f'优惠面积（1-6楼）: {mid_p_areas}')
-		self.resTxt.append(f'市场价（1-6楼）： {c}')
-		self.resTxt.append(f'市场价面积（1-6楼）：{h_p_areas}')
+		self.resTxt.append('')
+		self.resTxt.append('拆迁价（1-6楼）: {a}'.format(a=a))
+		self.resTxt.append('拆迁面积（1-6楼）: {cheap_areas}'.format(cheap_areas=cheap_areas))
+		self.resTxt.append('')
+		self.resTxt.append('优惠价（1-6楼）: {b}'.format(b=b))
+		self.resTxt.append('优惠面积（1-6楼）: {mid_p_areas}'.format(mid_p_areas=mid_p_areas))
+		self.resTxt.append('')
+		self.resTxt.append('市场价（1-6楼）： {c}'.format(c=c))
+		self.resTxt.append('市场价面积（1-6楼）：{h_p_areas}'.format(h_p_areas=h_p_areas))
+		self.resTxt.append('')
 
-		self.resTxt.append(f'购房总价 - 购房券 = {all_price - coupon}')
+		self.resTxt.append('购房总价 - 购房券 = {res_price}'.format(res_price=all_price - coupon))
         
 
 if __name__=="__main__":    
