@@ -79,23 +79,26 @@ class MyWindow(QWidget):
 		all_price, cheap_areas, mid_p_areas, h_p_areas = getAllPrice(areas, coupon)
 
 		self.resTxt.clear()
-		self.resTxt.append('购房券 {coupon}'.format(coupon=coupon))
-		self.resTxt.append('购房面积（1-6楼）{areas}'.format(areas=areas))
+		tplt = "{0:{3}^10}\t{1:{3}^10}\t{2:^10}"
+		self.resTxt.append('购房券      {coupon}'.format(coupon=format(coupon, ',')))
+		self.resTxt.append('购房面积    {areas}'.format(areas='%7d,'*len(areas) %(tuple(areas))))
 
-		self.resTxt.append("购房总价: {all_price}".format(all_price=all_price))
+		self.resTxt.append("购房总价:   {all_price}".format(all_price=format(all_price, ',')))
+		self.resTxt.append('')
+		self.resTxt.append('楼层:       {floor}'.format(floor='%7s'*len(a) %(tuple(['1楼','2楼','3楼','4楼','5楼','6楼','特价4楼']))))
+		self.resTxt.append('拆迁价:     {a}'.format(a='%7d,'*len(a) %(tuple(a))))
+		self.resTxt.append('拆迁面积:   {cheap_areas}'.format(cheap_areas='%7d,'*len(cheap_areas) %(tuple(cheap_areas))))
+		self.resTxt.append('')
+		self.resTxt.append('优惠价:     {b}'.format(b='%7d,'*len(b) %(tuple(b))))
+		self.resTxt.append('优惠面积:   {mid_p_areas}'.format(mid_p_areas='%7d,'*len(mid_p_areas) %(tuple(mid_p_areas))))
+		self.resTxt.append('')
+		self.resTxt.append('市场价：    {c}'.format(c='%7d,'*len(c) %(tuple(c))))
+		self.resTxt.append('市场价面积：{h_p_areas}'.format(h_p_areas='%7d,'*len(h_p_areas) %(tuple(h_p_areas))))
+		self.resTxt.append('')
+		self.resTxt.append('总房价：    {h_p_areas}'.format(h_p_areas='%7d,'*len(h_p_areas) %(tuple(a*cheap_areas+b*mid_p_areas+c*h_p_areas))))
+		self.resTxt.append('')
 
-		self.resTxt.append('')
-		self.resTxt.append('拆迁价（1-6楼）: {a}'.format(a=a))
-		self.resTxt.append('拆迁面积（1-6楼）: {cheap_areas}'.format(cheap_areas=cheap_areas))
-		self.resTxt.append('')
-		self.resTxt.append('优惠价（1-6楼）: {b}'.format(b=b))
-		self.resTxt.append('优惠面积（1-6楼）: {mid_p_areas}'.format(mid_p_areas=mid_p_areas))
-		self.resTxt.append('')
-		self.resTxt.append('市场价（1-6楼）： {c}'.format(c=c))
-		self.resTxt.append('市场价面积（1-6楼）：{h_p_areas}'.format(h_p_areas=h_p_areas))
-		self.resTxt.append('')
-
-		self.resTxt.append('购房总价 - 购房券 = {res_price}'.format(res_price=all_price - coupon))
+		self.resTxt.append('购房总价 - 购房券 = {all_price} - {coupon} = {res_price}'.format(all_price=format(all_price, ','),coupon=format(coupon, ','),res_price=format(all_price - coupon, ',')))
 
 	def clearText(self):
 		for edit in self.floorAreas:
