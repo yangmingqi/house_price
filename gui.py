@@ -1,3 +1,6 @@
+import sys, os
+if hasattr(sys, 'frozen'):
+	os.environ['PATH'] = sys._MEIPASS + ";" + os.environ['PATH']
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QTextEdit
 from PyQt5.QtGui import QRegExpValidator, QIntValidator, QDoubleValidator
 from house_price import *
@@ -21,6 +24,8 @@ class MyWindow(QWidget):
 	    for i in range(6):
 	        floorLabels.append(QLabel("{flooor}楼:{price}元/平米".format(flooor = i+1,price=a[i])))
 	        self.floorAreas.append(QLineEdit(""))
+	    floorLabels.append(QLabel("4楼(特价):{price}元/平米".format(price=a[-1])))
+	    self.floorAreas.append(QLineEdit(""))
 
 	    for i,(label, edit) in enumerate(zip(floorLabels, self.floorAreas)):
 	        glayout.addWidget(label,i,0)
@@ -34,7 +39,10 @@ class MyWindow(QWidget):
 	    hlayout.addStretch(1)
 	    self.calBtn = QPushButton('计算')
 	    self.calBtn.clicked.connect(self.calculate)
+	    self.clearBtn = QPushButton('清空')
+	    self.clearBtn.clicked.connect(self.clearText)
 	    hlayout.addWidget(self.calBtn)
+	    hlayout.addWidget(self.clearBtn)
 	    hlayout.addStretch(1)
 
 	    self.resTxt = QTextEdit("")
@@ -88,7 +96,12 @@ class MyWindow(QWidget):
 		self.resTxt.append('')
 
 		self.resTxt.append('购房总价 - 购房券 = {res_price}'.format(res_price=all_price - coupon))
-        
+
+	def clearText(self):
+		for edit in self.floorAreas:
+			edit.clear()
+		self.couponEdit.clear()
+		self.resTxt.clear()    
 
 if __name__=="__main__":    
     import sys    
