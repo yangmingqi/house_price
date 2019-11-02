@@ -4,6 +4,7 @@ if hasattr(sys, 'frozen'):
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QTextEdit
 from PyQt5.QtGui import QRegExpValidator, QIntValidator, QDoubleValidator
 from house_price import *
+from decimal import Decimal, ROUND_HALF_UP
 import numpy as np
  
 class MyWindow(QWidget):  
@@ -11,6 +12,7 @@ class MyWindow(QWidget):
 	def __init__(self):  
 	    super().__init__()
 	    self.setWindowTitle('拆迁房价计算器')
+	    self.resize(550,600)
 	    
 	    # 开始：
 	    wlayout = QVBoxLayout() # 竖直
@@ -71,34 +73,40 @@ class MyWindow(QWidget):
 				area = 0.
 			areas.append(area)
 		try:
-			coupon = float(self.couponEdit.text())
+			coupon = float(self.couponEdit.text().replace(' ','').replace(',','').replace('，',''))
 		except:
 			coupon = 0
 		areas = np.array(areas)
 
-		all_price, cheap_areas, mid_p_areas, h_p_areas = getAllPrice(areas, coupon)
+		_, cheap_areas, mid_p_areas, h_p_areas = getAllPrice(areas, coupon)
+		
+		all_per_floor_price = [Decimal(str(p)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP) for p in a*cheap_areas+b*mid_p_areas+c*h_p_areas]
+		all_price = Decimal(str(sum(all_per_floor_price))).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
+		all_price = float(all_price)
+		diff_price = Decimal(str(all_price - coupon)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
 
 		self.resTxt.clear()
 		tplt = "{0:{3}^10}\t{1:{3}^10}\t{2:^10}"
 		self.resTxt.append('购房券      {coupon}'.format(coupon=format(coupon, ',')))
-		self.resTxt.append('购房面积    {areas}'.format(areas='%7d,'*len(areas) %(tuple(areas))))
+		self.resTxt.append('购房面积    {areas}'.format(areas='%8s,'*len(areas) %(tuple(areas))))
 
 		self.resTxt.append("购房总价:   {all_price}".format(all_price=format(all_price, ',')))
 		self.resTxt.append('')
-		self.resTxt.append('楼层:       {floor}'.format(floor='%7s'*len(a) %(tuple(['1楼','2楼','3楼','4楼','5楼','6楼','特价4楼']))))
-		self.resTxt.append('拆迁价:     {a}'.format(a='%7d,'*len(a) %(tuple(a))))
-		self.resTxt.append('拆迁面积:   {cheap_areas}'.format(cheap_areas='%7d,'*len(cheap_areas) %(tuple(cheap_areas))))
+		self.resTxt.append('楼层:       {floor}'.format(floor='%8s'*len(a) %(tuple(['1楼','2楼','3楼','4楼','5楼','6楼','特价4楼']))))
+		self.resTxt.append('拆迁价:     {a}'.format(a='%8d,'*len(a) %(tuple(a))))
+		self.resTxt.append('拆迁面积:   {cheap_areas}'.format(cheap_areas='%8s,'*len(cheap_areas) %(tuple(cheap_areas))))
 		self.resTxt.append('')
-		self.resTxt.append('优惠价:     {b}'.format(b='%7d,'*len(b) %(tuple(b))))
-		self.resTxt.append('优惠面积:   {mid_p_areas}'.format(mid_p_areas='%7d,'*len(mid_p_areas) %(tuple(mid_p_areas))))
+		self.resTxt.append('优惠价:     {b}'.format(b='%8d,'*len(b) %(tuple(b))))
+		self.resTxt.append('优惠面积:   {mid_p_areas}'.format(mid_p_areas='%8s,'*len(mid_p_areas) %(tuple(mid_p_areas))))
 		self.resTxt.append('')
-		self.resTxt.append('市场价：    {c}'.format(c='%7d,'*len(c) %(tuple(c))))
-		self.resTxt.append('市场价面积：{h_p_areas}'.format(h_p_areas='%7d,'*len(h_p_areas) %(tuple(h_p_areas))))
+		self.resTxt.append('市场价：    {c}'.format(c='%8d,'*len(c) %(tuple(c))))
+		self.resTxt.append('市场价面积：{h_p_areas}'.format(h_p_areas='%8s,'*len(h_p_areas) %(tuple(h_p_areas))))
 		self.resTxt.append('')
-		self.resTxt.append('总房价：    {h_p_areas}'.format(h_p_areas='%7d,'*len(h_p_areas) %(tuple(a*cheap_areas+b*mid_p_areas+c*h_p_areas))))
+		self.resTxt.append("总房价：    {h_p_areas}".format(h_p_areas='%8s,'*len(h_p_areas) %(tuple(all_per_floor_price))))
 		self.resTxt.append('')
+		# self.resTxt.insertHtml("<font color='red'>Hello PyQt5!。</font>")
 
-		self.resTxt.append('购房总价 - 购房券 = {all_price} - {coupon} = {res_price}'.format(all_price=format(all_price, ','),coupon=format(coupon, ','),res_price=format(all_price - coupon, ',')))
+		self.resTxt.append('购房总价 - 购房券 = {all_price} - {coupon} = {res_price}'.format(all_price=format(all_price, ','),coupon=format(coupon, ','),res_price=format(diff_price, ',')))
 
 	def clearText(self):
 		for edit in self.floorAreas:
