@@ -78,7 +78,7 @@ class MyWindow(QWidget):
 			coupon = 0
 		areas = np.array(areas)
 
-		_, cheap_areas, mid_p_areas, h_p_areas = getAllPrice(areas, coupon)
+		cheap_areas, mid_p_areas, h_p_areas = getAllPrice(areas, coupon)
 		
 		all_per_floor_price = [Decimal(str(p)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP) for p in a*cheap_areas+b*mid_p_areas+c*h_p_areas]
 		all_price = Decimal(str(sum(all_per_floor_price))).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)

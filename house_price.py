@@ -37,11 +37,11 @@ def getcheapPrice(areas, coupon, sorted_price):
             return cheap_price, cheap_areas
         if area > 0:
             if coupon >= area * price:
-                if sum_cheap_areas + area > 280:
-                    area = 280 - sum_cheap_areas
-                    cheap_price += area * price
-                    cheap_areas[floor] = area
-                    return cheap_price, cheap_areas
+                # if sum_cheap_areas + area > 280:
+                #     area = 280 - sum_cheap_areas
+                #     cheap_price += area * price
+                #     cheap_areas[floor] = area
+                #     return cheap_price, cheap_areas
                     
                 coupon -= area * price
                 cheap_price += area * price
@@ -51,17 +51,17 @@ def getcheapPrice(areas, coupon, sorted_price):
                 # area = round_up(coupon / price)
 
                 # area = decimal.Decimal(str(coupon / price)).quantize(decimal.Decimal("0.00"))
-                if sum_cheap_areas + area > 280:
-                    area = 280 - sum_cheap_areas
-                    cheap_price += area * price
-                    cheap_areas[floor] = area
-                    return cheap_price, cheap_areas
-                else:
-                    cheap_price += coupon
-                    # area = round(coupon / price, 2)
-                    area = Decimal(str(coupon / price)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
-                    cheap_areas[floor] = float(area)
-                    return cheap_price, cheap_areas
+                # if sum_cheap_areas + area > 280:
+                #     area = 280 - sum_cheap_areas
+                #     cheap_price += area * price
+                #     cheap_areas[floor] = area
+                #     return cheap_price, cheap_areas
+                # else:
+                cheap_price += coupon
+                # area = round(coupon / price, 2)
+                area = Decimal(str(coupon / price)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
+                cheap_areas[floor] = float(area)
+                return cheap_price, cheap_areas
     return cheap_price, cheap_areas
 
 def getNormalPrice(areas, sorted_middle_price):
@@ -85,7 +85,16 @@ def getNormalPrice(areas, sorted_middle_price):
 def getAllPrice(areas, coupon):
     if coupon == 0:
         return sum(areas * c), [0] * len(areas), [0] * len(areas), areas
-    cheap_price, cheap_areas = getcheapPrice(areas, coupon, sorted_cheap_price)
+    _, cheap_areas = getcheapPrice(areas, coupon, sorted_cheap_price)
+    if sum(cheap_areas) > 280:
+        sum_cheap_areas = 0
+        for k, v in sorted_cheap_price:
+            if cheap_areas[k] <= 280 - sum_cheap_areas:
+                sum_cheap_areas += cheap_areas[k]
+            else:
+                cheap_areas[k] = 280 - sum_cheap_areas
+                sum_cheap_areas = 280
+
     cheap_areas = [Decimal(str(a)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP) for a in cheap_areas]
     cheap_areas = np.array([float(a) for a in cheap_areas])
     # cheap_price = [Decimal(str(a)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP) for a in cheap_price]
@@ -95,22 +104,22 @@ def getAllPrice(areas, coupon):
     h_p_areas = areas-cheap_areas-mid_p_areas
     h_p_areas = [Decimal(str(a)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP) for a in h_p_areas]
     h_p_areas = np.array([float(a) for a in h_p_areas])
-    all_price = cheap_price + sum(mid_p_areas * b) + sum(h_p_areas * c)
-    return all_price, cheap_areas, mid_p_areas, h_p_areas
+    # all_price = cheap_price + sum(mid_p_areas * b) + sum(h_p_areas * c)
+    return  cheap_areas, mid_p_areas, h_p_areas
 
 
 if __name__ == '__main__':
-	coupon = 164189.04
-	areas = [82.03, 0, 0, 0, 0, 0]
+	coupon = 1464189.04
+	areas = [82.03, 89, 65, 0, 106, 0, 0]
 	areas = np.array(areas)
-	all_price, cheap_areas, mid_p_areas, h_p_areas = getAllPrice(areas, coupon)
-	# areas = np.array(areas)
+	cheap_areas, mid_p_areas, h_p_areas = getAllPrice(areas, coupon)
+
 	# cheap_price, cheap_areas = getcheapPrice(areas, coupon, sorted_cheap_price)
 	# print(cheap_areas, areas-cheap_areas)
 	# mid_p_areas = getNormalPrice(areas-cheap_areas, sorted_middle_price)
 	# h_p_areas = areas-cheap_areas-mid_p_areas
 
-	# all_price = cheap_price + sum(mid_p_areas * b) + sum(h_p_areas * c)
+	all_price = sum(a*cheap_areas+b*mid_p_areas+c*h_p_areas)
 
 	print('购房券', coupon)
 	print('购房面积（1-6楼）', areas, '\n')
