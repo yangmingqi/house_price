@@ -85,7 +85,7 @@ def getNormalPrice(areas, sorted_middle_price):
 def getAllPrice(areas, coupon):
     if coupon == 0:
         return sum(areas * c), [0] * len(areas), [0] * len(areas), areas
-    _, cheap_areas = getcheapPrice(areas, coupon, sorted_cheap_price)
+    cheap_price, cheap_areas = getcheapPrice(areas, coupon, sorted_cheap_price)
     if sum(cheap_areas) > 280:
         sum_cheap_areas = 0
         for k, v in sorted_cheap_price:
@@ -97,15 +97,17 @@ def getAllPrice(areas, coupon):
 
     cheap_areas = [Decimal(str(a)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP) for a in cheap_areas]
     cheap_areas = np.array([float(a) for a in cheap_areas])
-    # cheap_price = [Decimal(str(a)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP) for a in cheap_price]
-    # cheap_price = np.array([float(a) for a in cheap_price])
+    # cheap_price = Decimal(str(cheap_price)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
+    # cheap_price = float(cheap_price)
 
     mid_p_areas = getNormalPrice(areas-cheap_areas, sorted_middle_price)
     h_p_areas = areas-cheap_areas-mid_p_areas
     h_p_areas = [Decimal(str(a)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP) for a in h_p_areas]
     h_p_areas = np.array([float(a) for a in h_p_areas])
-    # all_price = cheap_price + sum(mid_p_areas * b) + sum(h_p_areas * c)
-    return  cheap_areas, mid_p_areas, h_p_areas
+    all_price = cheap_price + sum(mid_p_areas * b) + sum(h_p_areas * c)
+    all_price = Decimal(str(all_price)).quantize(Decimal("0.00"), rounding=ROUND_HALF_UP)
+    all_price = float(all_price)
+    return  all_price, cheap_areas, mid_p_areas, h_p_areas
 
 
 if __name__ == '__main__':
